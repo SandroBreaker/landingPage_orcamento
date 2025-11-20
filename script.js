@@ -58,15 +58,6 @@ function openLightbox(imgSrc, caption){
   openModal('lightbox');
 }
 
-/* ---------- máscara telefone ---------- */
-function mascaraTelefone(e){
-  let v = e.target.value || '';
-  v = v.replace(/\D/g,'');
-  v = v.replace(/^(\d{2})(\d)/g, '($1) $2');
-  v = v.replace(/(\d{5})(\d)/, '$1-$2');
-  e.target.value = v.substring(0, 15);
-}
-
 /* ---------- animações por scroll ---------- */
 function setupScrollAnimations(){
   const elements = document.querySelectorAll('.secao-padrao, .secao-numeros, .secao-historia, .secao-orcamento, .numero-card, .movel-card, .avaliacao-card, .card-diferencial, .faq-container');
@@ -90,10 +81,41 @@ function setupScrollAnimations(){
   });
 }
 
-/* ---------- formulário e integração ---------- */
+/* ---------- Robot Mascot Logic (Novo) ---------- */
+function initRobotPhrases() {
+  const bubble = document.getElementById('robot-bubble');
+  if(!bubble) return;
+
+  const frases = [
+    "Faça um orçamento! 📝",
+    "Montagem rápida? Aqui! ⚡",
+    "Preço justo hoje. 💰",
+    "Dúvidas? Me chama! 👋",
+    "Vamos montar? 🛠️"
+  ];
+
+  let idx = 0;
+
+  function showBubble() {
+    bubble.innerText = frases[idx];
+    bubble.classList.add('show');
+    idx = (idx + 1) % frases.length;
+
+    // Some após 3 segundos
+    setTimeout(() => {
+      bubble.classList.remove('show');
+    }, 3000);
+  }
+
+  // 1ª Frase: 5seg após carregar
+  setTimeout(showBubble, 5000);
+
+  // Loop: A cada 30seg
+  setInterval(showBubble, 30000);
+}
+
+/* ---------- Inicialização ---------- */
 document.addEventListener('DOMContentLoaded', () => {
-  const telInput = document.getElementById('telefone');
-  if(telInput) telInput.addEventListener('input', mascaraTelefone);
 
   document.querySelectorAll('.ver-mais-link').forEach(el => {
     el.addEventListener('click', (e) => {
@@ -113,131 +135,57 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  setTimeout(() => {
-    const bemv = document.getElementById('bemvindo');
-    if(bemv) {
-      bemv.style.display = 'block';
-      bemv.style.animation = 'slideInUp 0.45s forwards';
-    }
-  }, 3800);
-
   setupScrollAnimations();
-
-  const form = document.getElementById('formOrcamento');
-  const btnEnviar = document.getElementById('btnEnviar');
-  const feedback = document.getElementById('feedbackSucesso');
-
-  if(form){
-    form.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      if(!btnEnviar) return;
-
-      const tel = (document.getElementById('telefone') || {}).value || '';
-      if(tel.replace(/\D/g,'').length < 10){
-        showCard("Por favor, preencha um telefone válido com DDD.");
-        return;
-      }
-
-      btnEnviar.disabled = true;
-      const originalText = btnEnviar.innerText;
-      btnEnviar.innerText = "Enviando...";
-
-      const data = new FormData(form);
-      const objData = {};
-      data.forEach((v,k) => objData[k]=v);
-
-      try {
-        // ZONA ZERO-BUG: Configuração exata para passar pelo firewall do Google
-        const res = await fetch(SCRIPT_URL, {
-          method: 'POST',
-          mode: 'cors', 
-          headers: {
-            'Content-Type': 'text/plain;charset=utf-8',
-          },
-          body: JSON.stringify(objData)
-        });
-
-        if (!res.ok) {
-          throw new Error(`Erro no Servidor: ${res.status}`);
-        }
-
-        const json = await res.json();
-
-        if(json && json.sucesso){
-          form.reset();
-          if(feedback){ feedback.style.display = 'block'; feedback.innerText = '✅ Recebido! Abrindo o WhatsApp...'; }
-          
-          setTimeout(() => {
-            const msgZap = `Olá Carlos! Me chamo ${objData.nome || ''}. Quero um orçamento de montagem para: ${objData.tipo || ''}.`;
-            window.open(`https://wa.me/${WHATSAPP_NUM}?text=${encodeURIComponent(msgZap)}`, '_blank');
-            btnEnviar.disabled = false;
-            btnEnviar.innerText = originalText;
-            if(feedback) feedback.style.display = 'none';
-          }, 1500);
-        } else {
-          throw new Error(json && json.mensagem ? json.mensagem : 'Erro desconhecido no retorno.');
-        }
-
-      } catch(err){
-        console.error("DETALHE DO ERRO:", err);
-        if(err.name === 'SyntaxError') {
-             showCard('Erro de Permissão no Script. Verifique se está público.');
-        } else {
-             showCard('Erro ao enviar. Tente o botão do WhatsApp!');
-        }
-        btnEnviar.disabled = false;
-        btnEnviar.innerText = "Tentar Novamente";
-      }
-    }); // <--- FALTAVA ESTE FECHAMENTO
-  } // <--- FALTAVA ESTE FECHAMENTO
-
+  
   document.querySelectorAll('.modal-overlay').forEach(overlay => {
     overlay.addEventListener('click', (e) => {
       if(e.target === overlay) closeModal(overlay.id);
     });
   });
 
-  // Iniciar chat (se estiver fechado) após um tempo
-  setTimeout(() => {
-    const chatWidget = document.getElementById('chat-widget-container');
-    if(chatWidget && chatWidget.classList.contains('hidden')){
-       // Descomente a linha abaixo se quiser abrir automático
-       // toggleChatBot(); 
-    }
-  }, 7000);
+  // Inicia o Mascote Robô
+  initRobotPhrases();
+
+  // Inicia o Chat Automaticamente na Section (sem delay de widget)
+  initChatFlow();
 
 });
 
 /* =========================================
    LÓGICA CHATBOT ESPECIALISTA (ZERO-BUG)
+   EMBUTIDO NA PÁGINA (SEM TOGGLE)
    ========================================= */
 let chatState = 0; 
-// Agora armazenamos a Zona também para ajudar na logistica
 let chatData = { nome: '', tipo: '', detalhe: '', condicao: '', zona: '', bairro: '' };
 
-function toggleChatBot() {
-  const w = document.getElementById('chat-widget-container');
-  w.classList.toggle('hidden');
-  
+// Função chamada ao carregar a página
+function initChatFlow() {
   const msgs = document.getElementById('chat-messages');
-  if(!w.classList.contains('hidden') && msgs.innerHTML.trim() === '') {
-    botSay("Olá! 🤖 Sou o assistente virtual do Carlos.");
-    setTimeout(() => botSay("Vou fazer algumas perguntas rápidas para agilizar seu orçamento. Qual é o seu **Nome**?"), 600);
-    chatState = 1; 
+  if(msgs && msgs.innerHTML.trim() === '') {
+     // Pequeno delay para dar sensação de conexão
+     setTimeout(() => {
+        botSay("Olá! 🤖 Sou o assistente virtual do Carlos.");
+        setTimeout(() => botSay("Vou fazer algumas perguntas rápidas para te dar o preço na hora. Qual é o seu **Nome**?"), 800);
+        chatState = 1; 
+     }, 500);
   }
 }
 
 function botSay(text) {
   const msgs = document.getElementById('chat-messages');
+  if(!msgs) return;
+  
   const div = document.createElement('div');
   div.className = 'msg bot';
-  div.innerHTML = text; // Permite HTML (bold, etc)
+  div.innerHTML = text; 
   msgs.appendChild(div);
   msgs.scrollTop = msgs.scrollHeight;
 }
 
 function userSay(text) {
   const msgs = document.getElementById('chat-messages');
+  if(!msgs) return;
+
   const div = document.createElement('div');
   div.className = 'msg user';
   div.innerText = text;
@@ -247,6 +195,8 @@ function userSay(text) {
 
 function showOptions(options) {
   const msgs = document.getElementById('chat-messages');
+  if(!msgs) return;
+
   const div = document.createElement('div');
   div.className = 'chat-options';
   options.forEach(opt => {
@@ -266,10 +216,10 @@ function handleChatEnter(e) {
 
 function processUserMessage(optValue) {
   const input = document.getElementById('chat-input');
-  const text = optValue || input.value.trim();
+  const text = optValue || (input ? input.value.trim() : '');
   
   if(!text) return;
-  if(!optValue) input.value = ''; 
+  if(!optValue && input) input.value = ''; 
 
   userSay(text);
 
@@ -400,7 +350,7 @@ function processUserMessage(optValue) {
       botSay("Perfeito! Já montei o resumo do seu pedido.");
       botSay("👇 **Toque no botão abaixo** para me enviar no WhatsApp e receber o valor:");
       
-      // Criação da mensagem super detalhada para facilitar sua vida
+      // Criação da mensagem super detalhada
       const msgZap = `Olá Carlos! Sou *${chatData.nome}*.\n\nGostaria de um orçamento para:\n🛠️ *${chatData.tipo}*\n📝 Detalhe: ${chatData.detalhe}\n📦 Estado: ${chatData.condicao}\n\n📍 Local: ${chatData.zona} - ${chatData.bairro}`;
       
       const link = `https://wa.me/${WHATSAPP_NUM}?text=${encodeURIComponent(msgZap)}`;
@@ -410,6 +360,7 @@ function processUserMessage(optValue) {
       btnLink.href = link;
       btnLink.target = '_blank';
       btnLink.className = 'chat-btn-opt';
+      
       // Estilo de destaque para o botão final
       btnLink.style.background = '#25D366'; 
       btnLink.style.color = 'white';
