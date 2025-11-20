@@ -59,8 +59,7 @@
   <link rel="stylesheet" href="styles.css">
 </head>
 
-  <!-- Adicione antes do </body> -->
-<script src="https://cdn.jsdelivr.net/npm/eruda"></script>
+  <script src="https://cdn.jsdelivr.net/npm/eruda"></script>
 <script>eruda.init();</script>
 
 <body>
@@ -256,17 +255,28 @@
 
 <section id="orcamento" class="secao-orcamento secao-independente">
   <div class="orcamento-header">
-    <h2>Quer Montar Seu Móvel Comigo? Me Chama!</h2>
-    <p class="subtitulo-secao">Serviço de confiança garantido.</p>
+    <h2>Orçamento Rápido com Assistente Virtual</h2>
+    <p class="subtitulo-secao">Responda abaixo para receber o valor na hora.</p>
   </div>
-  <form id="formOrcamento">
-    <input type="text" name="nome" placeholder="Seu Nome Completo" required>
-    <input type="email" name="email" placeholder="Seu Email (Se quiser, não é obrigatório)">
-    <input type="tel" id="telefone" name="telefone" placeholder="Seu WhatsApp (DDD + Número) - Essencial!" required inputmode="numeric" maxlength="15">
-    <input type="text" name="tipo" placeholder="O que você precisa montar? (Guarda-Roupa, Cozinha, etc.)" required>
-    <textarea name="mensagem" placeholder="Algum detalhe extra? Onde é a montagem? (Opcional)" rows="4"></textarea>
-    <button type="submit" id="btnEnviar">Enviar Pedido de Orçamento</button>
-  </form>
+  
+  <div id="embedded-chat-container" class="embedded-chat">
+    <div class="chat-header-embedded">
+      <div class="chat-title">
+        <span class="dot-online"></span>
+        Carlos Assistente Virtual
+      </div>
+      <small> <span>🟢</span> Online Agora</small>
+    </div>
+    
+    <div id="chat-messages" class="chat-body-embedded">
+      </div>
+
+    <div class="chat-footer-embedded">
+      <input type="text" id="chat-input" placeholder="Digite sua resposta..." onkeypress="handleChatEnter(event)">
+      <button class="chat-send" onclick="processUserMessage()">➤</button>
+    </div>
+  </div>
+
   <div id="feedbackSucesso" class="feedback-sucesso" style="display:none;"></div>
 </section>
 
@@ -288,28 +298,12 @@
 
 <div class="card-notificacao" id="cardNotif" role="status" aria-live="polite" style="display:none;"></div>
 
-<div id="chat-widget-container" class="chat-widget hidden">
-  <div class="chat-header">
-    <div class="chat-title">
-      <span class="dot-online"></span>
-      Carlos Assistente Virtual
-    </div>
-    <button class="chat-close" onclick="toggleChatBot()">×</button>
-  </div>
-  
-  <div id="chat-messages" class="chat-body">
-    </div>
-
-  <div class="chat-footer">
-    <input type="text" id="chat-input" placeholder="Digite sua resposta..." onkeypress="handleChatEnter(event)">
-    <button class="chat-send" onclick="processUserMessage()">➤</button>
-  </div>
+<div class="robot-wrapper">
+  <div id="robot-bubble" class="robot-bubble">Precisa de ajuda? 🤖</div>
+  <button id="robot-fab" class="robot-fab" onclick="scrollToSection('orcamento')" aria-label="Ir para Orçamento">
+    <span class="robot-icon">🤖</span>
+  </button>
 </div>
-
-<button id="chat-fab" class="chat-fab" onclick="toggleChatBot()" aria-label="Abrir Chat">
-  <svg viewBox="0 0 24 24" fill="white" width="28" height="28"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg>
-  <span class="chat-badge">1</span>
-</button>
 
 <script src="script.js"></script>
 </body>
