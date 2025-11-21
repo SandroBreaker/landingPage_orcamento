@@ -87,11 +87,11 @@ function initRobotPhrases() {
   if(!bubble) return;
 
   const frases = [
-    "Faça um orçamento! 📝",
-    "Montagem rápida? Aqui! ⚡",
-    "Preço justo hoje. 💰",
-    "Dúvidas? Me chama! 👋",
-    "Vamos montar? 🛠️"
+    "Posso gerar seu orçamento! 💬",
+    "Serviço rápido? Fale comigo! ⚡",
+    "Valor na hora. 💰",
+    "Alguma dúvida? Envie aqui! 👋",
+    "Vamos iniciar seu atendimento! 📞"
   ];
 
   let idx = 0;
@@ -101,16 +101,10 @@ function initRobotPhrases() {
     bubble.classList.add('show');
     idx = (idx + 1) % frases.length;
 
-    // Some após 3 segundos
-    setTimeout(() => {
-      bubble.classList.remove('show');
-    }, 3000);
+    setTimeout(() => bubble.classList.remove('show'), 3000);
   }
 
-  // 1ª Frase: 5seg após carregar
   setTimeout(showBubble, 5000);
-
-  // Loop: A cada 30seg
   setInterval(showBubble, 30000);
 }
 
@@ -143,29 +137,23 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // Inicia o Mascote Robô
   initRobotPhrases();
 
-  // Inicia o Chat Automaticamente na Section (sem delay de widget)
   initChatFlow();
-
 });
 
 /* =========================================
-   LÓGICA CHATBOT ESPECIALISTA (ZERO-BUG)
-   EMBUTIDO NA PÁGINA (SEM TOGGLE)
+   LÓGICA CHATBOT ESPECIALISTA (GENÉRICO)
    ========================================= */
 let chatState = 0; 
 let chatData = { nome: '', tipo: '', detalhe: '', condicao: '', zona: '', bairro: '' };
 
-// Função chamada ao carregar a página
 function initChatFlow() {
   const msgs = document.getElementById('chat-messages');
   if(msgs && msgs.innerHTML.trim() === '') {
-     // Pequeno delay para dar sensação de conexão
      setTimeout(() => {
-        botSay("Olá! 🤖 Sou o assistente virtual do Carlos.");
-        setTimeout(() => botSay("Vou fazer algumas perguntas rápidas para te dar o preço na hora. Qual é o seu **Nome**?"), 800);
+        botSay("Olá! 🤖 Sou o assistente virtual.");
+        setTimeout(() => botSay("Vou fazer algumas perguntas rápidas para gerar seu orçamento. Qual é o seu **Nome**?"), 800);
         chatState = 1; 
      }, 500);
   }
@@ -223,108 +211,58 @@ function processUserMessage(optValue) {
 
   userSay(text);
 
-  // === ÁRVORE DE DECISÃO COMPLETA ===
   setTimeout(() => {
     
-    // 1. NOME -> TIPO GERAL
+    // 1. NOME → TIPO DO SERVIÇO
     if(chatState === 1) {
       chatData.nome = text;
-      botSay(`Prazer, ${text}! Qual categoria de móvel você precisa montar/desmontar?`);
+      botSay(`Prazer, ${text}! Qual serviço você precisa?`);
       showOptions([
-        'Guarda-Roupa', 
-        'Cozinha', 
-        'Sala (Rack/Painel)', 
-        'Cama/Berço', 
-        'Escritório',
-        'Desmontagem Geral'
+        'Instalação',
+        'Manutenção',
+        'Reparo',
+        'Consultoria',
+        'Atendimento Técnico',
+        'Outro Serviço'
       ]);
       chatState = 2;
     } 
     
-    // 2. TIPO GERAL -> DETALHES ESPECÍFICOS
+    // 2. TIPO → DETALHES
     else if(chatState === 2) {
       chatData.tipo = text;
 
-      // --- Lógica de Guarda-Roupa ---
-      if(text.includes('Guarda-Roupa')){
-        botSay("Guarda-roupas variam muito. Como ele é?");
-        showOptions([
-          '2 ou 3 Portas (Bater)', 
-          '4 a 6 Portas (Bater)', 
-          'Portas de Correr (Slide)', 
-          'Planejado (Marcenaria)',
-          'Closet Aberto'
-        ]);
-      }
-      // --- Lógica de Cozinha ---
-      else if(text.includes('Cozinha')){
-        botSay("Sobre a cozinha, qual o tamanho?");
-        showOptions([
-          'Kit Compacto (Pequena)', 
-          'Modulada (Vários Armários)', 
-          'Apenas Balcão/Pia',
-          'Planejada (Sob Medida)'
-        ]);
-      }
-      // --- Lógica de Sala ---
-      else if(text.includes('Sala')){
-        botSay("É fixado na parede ou de chão?");
-        showOptions([
-          'Painel de TV (Parede)', 
-          'Rack Simples (Chão)', 
-          'Estante Grande / Home',
-          'Suporte de TV'
-        ]);
-      }
-      // --- Lógica de Cama ---
-      else if(text.includes('Cama')){
-        botSay("Qual o modelo da cama?");
-        showOptions([
-          'Berço Infantil', 
-          'Cama Simples/Box', 
-          'Beliche / Treliche',
-          'Cama Baú (Hidráulica)'
-        ]);
-      }
-      // --- Lógica de Escritório ---
-      else if(text.includes('Escritório')){
-        botSay("O que seria no escritório?");
-        showOptions([
-          'Mesa Simples', 
-          'Mesa em L / Diretor', 
-          'Cadeira de Rodas',
-          'Armário / Estante'
-        ]);
-      }
-      // --- Desmontagem/Outros ---
-      else {
-        botSay("Entendi. É um móvel Padrão de Loja ou Planejado?");
-        showOptions(['Padrão de Loja', 'Móvel Planejado', 'Móvel Antigo']);
-      }
+      botSay("Certo! Pode detalhar um pouco mais?");
+      showOptions([
+        'Serviço Simples',
+        'Serviço Complexo',
+        'Projeto Grande',
+        'Projeto Pequeno',
+        'Não sei informar'
+      ]);
       
-      chatState = 3; // Avança para condição
+      chatState = 3;
     }
 
-    // 3. DETALHES -> CONDIÇÃO (NOVO vs USADO)
+    // 3. DETALHE → CONDIÇÃO
     else if(chatState === 3) {
       chatData.detalhe = text;
       
-      // Pergunta crucial para precificação
-      botSay("E qual a situação do móvel?");
+      botSay("Qual é a condição do item ou situação?");
       showOptions([
-        'Novo na Caixa (Loja)', 
-        'Usado (Já foi montado)', 
-        'Precisa Desmontar e Montar',
-        'Apenas Reparo/Regulagem'
+        'Novo',
+        'Usado',
+        'Precisa Ajuste',
+        'Somente Verificação'
       ]);
       
-      chatState = 4; // Avança para Zona
+      chatState = 4;
     }
 
-    // 4. CONDIÇÃO -> ZONA (LOCALIZAÇÃO MACRO)
+    // 4. CONDIÇÃO → ZONA
     else if(chatState === 4) {
       chatData.condicao = text;
-      botSay("Certo. Para calcular meu deslocamento, em qual **Região de SP** você está?");
+      botSay("Em qual **região** você está?");
       showOptions([
         'Zona Leste', 
         'Zona Sul', 
@@ -333,26 +271,33 @@ function processUserMessage(optValue) {
         'Centro', 
         'Grande SP / ABC'
       ]);
-      chatState = 5; // Avança para Bairro
+      chatState = 5;
     }
 
-    // 5. ZONA -> BAIRRO (LOCALIZAÇÃO MICRO)
+    // 5. ZONA → BAIRRO
     else if(chatState === 5) {
       chatData.zona = text;
-      botSay(`Entendi, ${text}. Para finalizar, digite o nome do seu **Bairro** ou Ponto de Referência:`);
-      chatState = 6; // Fim
+      botSay(`Beleza! Informe agora o **Bairro** ou ponto de referência:`);
+      chatState = 6;
     }
 
-    // 6. FINALIZAÇÃO -> LINK WHATSAPP
+    // 6. FINALIZA → WHATSAPP
     else if(chatState === 6) {
       chatData.bairro = text;
       
-      botSay("Perfeito! Já montei o resumo do seu pedido.");
-      botSay("👇 **Toque no botão abaixo** para me enviar no WhatsApp e receber o valor:");
-      
-      // Criação da mensagem super detalhada
-      const msgZap = `Olá Carlos! Sou *${chatData.nome}*.\n\nGostaria de um orçamento para:\n🛠️ *${chatData.tipo}*\n📝 Detalhe: ${chatData.detalhe}\n📦 Estado: ${chatData.condicao}\n\n📍 Local: ${chatData.zona} - ${chatData.bairro}`;
-      
+      botSay("Tudo certo! Montei o resumo do seu atendimento.");
+      botSay("👇 Toque para enviar no WhatsApp e receber o valor:");
+
+      const msgZap = 
+`Olá! Sou *${chatData.nome}*.
+
+Gostaria de um orçamento para:
+📌 Serviço: *${chatData.tipo}*
+🔧 Detalhe: ${chatData.detalhe}
+📦 Condição: ${chatData.condicao}
+
+📍 Local: ${chatData.zona} - ${chatData.bairro}`;
+
       const link = `https://wa.me/${WHATSAPP_NUM}?text=${encodeURIComponent(msgZap)}`;
       
       const msgs = document.getElementById('chat-messages');
@@ -360,9 +305,7 @@ function processUserMessage(optValue) {
       btnLink.href = link;
       btnLink.target = '_blank';
       btnLink.className = 'chat-btn-opt';
-      
-      // Estilo de destaque para o botão final
-      btnLink.style.background = '#25D366'; 
+      btnLink.style.background = '#25D366';
       btnLink.style.color = 'white';
       btnLink.style.textAlign = 'center';
       btnLink.style.display = 'block';
@@ -372,16 +315,17 @@ function processUserMessage(optValue) {
       btnLink.style.textDecoration = 'none';
       btnLink.style.borderRadius = '8px';
       btnLink.style.boxShadow = '0 4px 6px rgba(0,0,0,0.1)';
-      btnLink.innerHTML = '✅ <b>Ver Orçamento no WhatsApp</b>';
-      
+      btnLink.innerHTML = '✅ Enviar no WhatsApp';
+
       msgs.appendChild(btnLink);
       msgs.scrollTop = msgs.scrollHeight;
       
-      chatState = 7; // Estado final travado
+      chatState = 7;
     }
-    
+
     else if(chatState === 7) {
-       botSay("O link já foi gerado acima! Pode clicar nele para falar comigo. 👍");
+       botSay("O link já está acima! Só tocar para enviar. 👍");
     }
-  }, 600); // Delay natural de "digitando..."
+
+  }, 600);
 }
