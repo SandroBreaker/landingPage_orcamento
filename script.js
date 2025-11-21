@@ -1,6 +1,6 @@
 /* script.js - Lógica Zero-Bug */
 
-const WHATSAPP_NUM = "5511954558195"; 
+const WHATSAPP_NUM = "5511968036476"; 
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwTjmfUd-_Nx_1Tcpsu1EQINJB8RxwGWLrkT1FQhQ_WFlg_P6Ov0gAiA3Gx8OkMBbU/exec";
 
 /* ---------- helpers ---------- */
